@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>アーカイブサイト</title>
+<style>
+  :root {
+    --navy: #14233f;
+    --navy-deep: #0e1a30;
+    --text: #f4f1ea;
+    --muted: #a9b4c9;
+    --line: rgba(255, 255, 255, 0.35);
+    --dot: rgba(255, 255, 255, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    color: var(--text);
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
+    line-height: 1.9;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--navy);
+    background-image:
+      radial-gradient(circle, var(--dot) 0 3px, transparent 3.5px),
+      radial-gradient(circle, var(--dot) 0 3px, transparent 3.5px);
+    background-size: 56px 56px;
+    background-position: 0 0, 28px 28px;
+  }
+
+  header {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    padding: 0 32px;
+  }
+
+  .header-panel {
+    background: var(--navy);
+    border: 1px solid var(--line);
+    padding: 48px 40px 36px;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  .question {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    max-width: 640px;
+  }
+
+  .question .label {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .question .text {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 32px 72px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
+    gap: 40px 32px;
+  }
+
+  .item {
+    margin: 0;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    padding: 14px 14px 0;
+  }
+
+  .photo-button {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: var(--navy-deep);
+    cursor: zoom-in;
+    overflow: hidden;
+    color: inherit;
+    font: inherit;
+  }
+
+  .photo-button img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .photo-button:hover img { transform: scale(1.02); }
+
+  .photo-button:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 4px;
+  }
+
+  /* 画像が見つからないときの表示 */
+  .photo-button.missing {
+    cursor: default;
+    aspect-ratio: 4 / 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--muted);
+    word-break: break-all;
+  }
+
+  .item figcaption {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+    padding: 14px 4px 16px;
+  }
+
+  .item .no {
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .item .name {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  footer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px 64px;
+  }
+
+  footer span {
+    display: inline-block;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    padding: 6px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* 拡大表示 */
+  dialog {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100%;
+    height: 100%;
+  }
+
+  dialog::backdrop { background: rgba(8, 14, 28, 0.94); }
+
+  .viewer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 16px;
+    cursor: zoom-out;
+  }
+
+  .viewer img {
+    max-width: 100%;
+    max-height: calc(100vh - 120px);
+    object-fit: contain;
+  }
+
+  .viewer p {
+    margin: 0;
+    color: var(--text);
+    font-size: 16px;
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 600px) {
+    header { margin-top: 24px; padding: 0 16px; }
+    .header-panel { padding: 32px 22px 26px; }
+    main { padding: 28px 16px 56px; }
+    footer { padding: 0 16px 48px; }
+    .grid { gap: 28px 0; }
+    body { background-size: 44px 44px; background-position: 0 0, 22px 22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .photo-button img { transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-panel">
+    <h1>アーカイブサイト</h1>
+    <div class="question">
+      <span class="label">いま気になっていること</span>
+      <p class="text">(ここに言葉)</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer><span>写真をクリックすると大きく表示されます</span></footer>
+
+<dialog id="viewer-dialog" aria-label="写真の拡大表示">
+  <div class="viewer" id="viewer">
+    <img id="viewer-img" src="" alt="">
+    <p id="viewer-name"></p>
+  </div>
+</dialog>
+
+<script>
+  // 画像フォルダの名前（GitHub Pages では大文字小文字も区別されます）
+  const IMAGE_DIR = "images";
+
+  // 拡張子は、この順番で自動的に試します
+  const EXTENSIONS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp"];
+
+  // 写真の一覧：拡張子なしのファイル名を書きます。増やすときは1行足します
+  const items = [
+    { base: "01", name: "(ここに言葉)" },
+    { base: "02", name: "(ここに言葉)" },
+    { base: "03", name: "(ここに言葉)" },
+    { base: "04", name: "(ここに言葉)" },
+    { base: "05", name: "(ここに言葉)" }
+  ];
+
+  const grid = document.getElementById("grid");
+  const dialog = document.getElementById("viewer-dialog");
+  const viewerImg = document.getElementById("viewer-img");
+  const viewerName = document.getElementById("viewer-name");
+
+  items.forEach(function (item, index) {
+    const number = String(index + 1).padStart(2, "0");
+    const candidates = EXTENSIONS.map(function (ext) {
+      return IMAGE_DIR + "/" + item.base + "." + ext;
+    });
+
+    const figure = document.createElement("figure");
+    figure.className = "item";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "photo-button";
+    button.setAttribute("aria-label", "資料 " + number + " を大きく表示");
+
+    const img = document.createElement("img");
+    img.alt = "資料 " + number;
+
+    let tryIndex = 0;
+    let resolvedSrc = "";
+
+    img.addEventListener("load", function () {
+      resolvedSrc = img.getAttribute("src");
+    });
+
+    img.addEventListener("error", function () {
+      tryIndex += 1;
+      if (tryIndex < candidates.length) {
+        img.src = candidates[tryIndex];
+      } else {
+        // すべて失敗：探したパスを画面に出す
+        button.className = "photo-button missing";
+        button.disabled = true;
+        button.textContent = "画像が見つかりません：" + candidates[0] + "（など）";
+      }
+    });
+
+    img.src = candidates[0];
+    button.appendChild(img);
+
+    button.addEventListener("click", function () {
+      if (!resolvedSrc) return;
+      viewerImg.src = resolvedSrc;
+      viewerImg.alt = "資料 " + number;
+      viewerName.textContent = item.name;
+      dialog.showModal();
+    });
+
+    const caption = document.createElement("figcaption");
+
+    const no = document.createElement("span");
+    no.className = "no";
+    no.textContent = number;
+
+    const name = document.createElement("p");
+    name.className = "name";
+    name.textContent = item.name;
+
+    caption.appendChild(no);
+    caption.appendChild(name);
+
+    figure.appendChild(button);
+    figure.appendChild(caption);
+    grid.appendChild(figure);
+  });
+
+  // どこをクリックしても閉じる（Escキーでも閉じます）
+  dialog.addEventListener("click", function () {
+    dialog.close();
+  });
+</script>
+
+</body>
+</html>
